@@ -5,17 +5,19 @@ module Accounting
     end
 
     def find_double_key(checksum)
-      combination = find_combinations(checksum).compact.first
-      combination[0] * combination[1]
+      combination = find_combinations(2, checksum)
+      combination.reduce(&:*)
+    end
+
+    def find_triple_key(checksum)
+      combination = find_combinations(3, checksum)
+      combination.reduce(&:*)
     end
 
     protected
 
-    def find_combinations(checksum)
-      @numbers.map do |number1|
-        next unless (number2 = @numbers.detect { |n2| n2 + number1 == checksum })
-        [number1, number2]
-      end
+    def find_combinations(count, checksum)
+      @numbers.permutation(count).detect { |numbers| numbers.sum == checksum }
     end
   end
 end

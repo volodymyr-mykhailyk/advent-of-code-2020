@@ -9,5 +9,8 @@ info "Finding pair of numbers in input: #{input.length}"
 
 expense_report = Accounting::ExpenseReport.new(input)
 
-output = expense_report.find_double_key(2020)
-info "Report checksum #{output}"
+output2 = expense_report.find_double_key(2020)
+info "Report checksum for two numbers: #{output2}"
+
+output3 = expense_report.find_triple_key(2020)
+info "Report checksum for three numbers: #{output3}"
