@@ -1,0 +1,32 @@
+name: ci
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 2.7.x
+
+      - name: Cache dependencies
+        uses: actions/cache@v1
+        with:
+          path: vendor/bundle
+          key: ruby-${{ hashFiles('Gemfile.lock') }}
+          restore-keys: ruby-
+
+      - name: Set up Bundler
+        run: gem install bundler
+
+      - name: Set up Dependencies
+        run: bundle install --path vendor/bundle
+
+      - name: Run Tests
+        run: bundle exec rspec
+
