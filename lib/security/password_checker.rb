@@ -1,6 +1,6 @@
 module Security
   class PasswordChecker
-    def valid?(policy, password)
+    def valid_for_sled_rental?(policy, password)
       occurrences, symbol = read_policy(policy)
       occurrences.include?(password.count(symbol))
     end

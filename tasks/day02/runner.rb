@@ -9,5 +9,5 @@ info "Finding invalid passwords in input: #{input.length}"
 
 password_checker = Security::PasswordChecker.new
 
-valid_passwords = input.count { |policy, password| password_checker.valid?(policy, password) }
+valid_passwords = input.count { |policy, password| password_checker.valid_for_sled_rental?(policy, password) }
 info "Number of valid passwords: #{valid_passwords}"
