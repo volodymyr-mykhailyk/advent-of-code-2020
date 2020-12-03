@@ -3,11 +3,36 @@ require 'security/password_checker'
 
 RSpec.describe Security::PasswordChecker do
   subject(:checker) { described_class.new }
-  it 'checks valid password' do
-    expect(checker.valid_for_sled_rental?('1-3 m', 'mmpth')).to be_truthy
+
+  describe 'sled_rental passwords' do
+    it 'verifies valid password' do
+      expect(checker.valid_for_sled_rental?('1-3 a', 'abcde')).to be_truthy
+    end
+
+    it 'verifies invalid password' do
+      expect(checker.valid_for_sled_rental?('1-3 b', 'cdefg')).to be_falsey
+    end
+
+    it 'verifies valid password' do
+      expect(checker.valid_for_sled_rental?('2-9 c', 'ccccccccc')).to be_truthy
+    end
   end
 
-  it 'checks invalid password' do
-    expect(checker.valid_for_sled_rental?('4-5 m', 'mmpth')).to be_falsey
+  describe 'toboggan_authentication passwords' do
+    it 'verifies valid password' do
+      expect(checker.valid_for_toboggan_authentication?('1-3 a', 'abcde')).to be_truthy
+    end
+
+    it 'verifies invalid password' do
+      expect(checker.valid_for_toboggan_authentication?('1-3 b', 'cdefg')).to be_falsey
+    end
+
+    it 'verifies invalid password' do
+      expect(checker.valid_for_toboggan_authentication?('2-9 c', 'ccccccccc')).to be_falsey
+    end
+
+    it 'verifies invalid password' do
+      expect(checker.valid_for_toboggan_authentication?('3-6 n', 'kntwpnn')).to be_truthy
+    end
   end
 end
