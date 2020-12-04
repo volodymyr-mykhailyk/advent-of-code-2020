@@ -20,6 +20,17 @@ module Utils
       self
     end
 
+    # def group_using(separator)
+    #   position = 0
+    #   chunked = @output.chunk do |e|
+    #     position += 1 if e == separator
+    #     position
+    #   end
+    #   puts chunked.to_a.inspect
+    #   @output = chunked.map { |_p, group| group }
+    #   self
+    # end
+
     def to_integer
       @output = convert_output { |element| element.to_i }
       self
