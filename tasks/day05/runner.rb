@@ -9,5 +9,11 @@ info "Processing #{tickets.length} tickets"
 
 scanner = Airlines::TicketsScanner.new
 
-max_seat_id = tickets.map { |ticket| scanner.seat_id(ticket) }.max
-info "Max seat id is: #{max_seat_id}"
+seats = tickets.map { |ticket| scanner.seat_id(ticket) }
+max_seat = seats.max
+info "Max seat id is: #{max_seat}"
+
+seats_map = Hash[seats.map { |seat_id| [seat_id, true] }]
+missing_seats = max_seat.times.select { |seat| !seats_map[seat] }
+my_seat = missing_seats.find { |seat| seats_map[seat - 1] && seats_map[seat + 1] }
+info "My seat id is: #{my_seat}"
