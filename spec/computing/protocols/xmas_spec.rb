@@ -20,15 +20,18 @@ RSpec.describe Computing::Protocols::Xmas do
     expect { protocol.process_next(2) }.to raise_error('invalid sequence')
   end
 
-  context "example scenario" do
-    it 'not raises error on valid numbers' do
-      numbers = [40, 62, 55, 65, 95, 102, 117, 150, 182]
-      expect { numbers.each { |number| protocol.process_next(number) } }.not_to raise_error
+  describe 'Decipher' do
+    let(:input) { [35, 20, 15, 25, 47, 40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576] }
+    let(:decipher) { Computing::Protocols::Xmas::Decipher.new(input, 5) }
+
+    it 'returns correct invalid number' do
+      decipher.crack_protocol
+      expect(decipher.invalid_number).to eq(127)
     end
 
-    it 'raises error on correct number' do
-      numbers = [40, 62, 55, 65, 95, 102, 117, 150, 182, 127, 219, 299, 277, 309, 576]
-      expect { numbers.each { |number| protocol.process_next(number) } }.to raise_error('invalid sequence')
+    it 'returns encryption weakness' do
+      decipher.crack_protocol
+      expect(decipher.encryption_weakness).to eq(62)
     end
   end
 end
