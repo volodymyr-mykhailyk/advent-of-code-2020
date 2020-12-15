@@ -14,7 +14,11 @@ module Computing
       end
 
       def has_sum?(result, elements = 2)
-        combination(elements).any? { |numbers| numbers.sum == result }
+        !!find_sum_combination(result, elements)
+      end
+
+      def find_sum_combination(result, elements = 2)
+        combination(elements).detect { |numbers| numbers.sum == result }
       end
     end
   end
