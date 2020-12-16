@@ -1,8 +1,8 @@
 require 'spec_helper'
-require 'travel/train/ticket_field'
+require 'travel/trains/ticket_field'
 
-describe Travel::Train::TicketField do
-  let(:field) {Travel::Train::TicketField.new('class', '1-3 or 5-7')}
+describe Travel::Trains::TicketField do
+  let(:field) {Travel::Trains::TicketField.new('class', '1-3 or 5-7')}
 
   describe '#matches?' do
     it 'matches boundary value' do

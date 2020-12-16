@@ -1,43 +1,31 @@
 require_relative '../utils/printer'
 require_relative '../utils/input_reader'
-require_relative '../../lib/travel/train/ticket_field'
+require_relative '../../lib/travel/trains/ticket_field'
+require_relative '../../lib/travel/trains/ticket'
+require_relative '../../lib/travel/trains/fields_positioner'
 
-conditions_reader = Utils::InputReader.new(File.expand_path('input_conditions.txt'))
+fields_reader = Utils::InputReader.new(File.expand_path('input_conditions.txt'))
 tickets_reader = Utils::InputReader.new(File.expand_path('input_tickets.txt'))
 
-my_ticket = [109, 199, 223, 179, 97, 227, 197, 151, 73, 79, 211, 181, 71, 139, 53, 149, 137, 191, 83, 193]
-conditions = conditions_reader.all_lines.split_with(': ').read.map { |condition| Travel::Train::TicketField.new(*condition) }
-tickets = tickets_reader.all_lines.split_with(',').read.map { |ticket| ticket.map(&:to_i) }
-info "Decoding #{tickets.count} tickets over #{conditions.count} conditions"
+field_values = fields_reader.all_lines.split_with(': ').read
+ticket_values = tickets_reader.all_lines.split_with(',').read
+my_ticket_values = [109, 199, 223, 179, 97, 227, 197, 151, 73, 79, 211, 181, 71, 139, 53, 149, 137, 191, 83, 193]
 
-invalid_checksum = tickets.sum do |ticket|
-  ticket.select do |field|
-    conditions.none? { |condition| condition.match?(field) }
-  end.sum
-end
+fields = field_values.map { |condition| Travel::Trains::TicketField.new(*condition) }
+tickets = ticket_values.map { |values| Travel::Trains::Ticket.new(fields, values.map(&:to_i)) }
+my_ticket = Travel::Trains::Ticket.new(fields, my_ticket_values)
 
-info "Invalid checksum #{invalid_checksum}"
+info "Decoding #{tickets.count} tickets over #{fields.count} fields"
 
-valid_tickets = tickets.select { |ticket| ticket.all? { |field| conditions.any? { |condition| condition.match?(field) } } }
-valid_tickets.push(my_ticket)
+
+validity_checksum = tickets.sum(&:validity_checksum)
+info "Invalid tickets checksum: #{validity_checksum}"
+
+valid_tickets = tickets.select(&:valid?).push(my_ticket)
 info "Number of valid tickets: #{valid_tickets.count}"
 
-valid_tickets.each do |ticket|
-  ticket.each.with_index do |field, index|
-    conditions.each { |condition| condition.guess_position(field, index) }
-  end
-end
+fields_positioner = Travel::Trains::FieldsPositioner.new(fields)
+fields_positioner.guess_positions(valid_tickets)
 
-iteration = 0
-while conditions.any?(&:multivariant?) do
-  info "Guessing positions: #{iteration += 1}"
-  obvious_positions = conditions.reject(&:multivariant?)
-  multivariant_positions = conditions.select(&:multivariant?)
-  multivariant_positions.each { |condition| obvious_positions.each { |obvious_condition| condition.remove_positions(obvious_condition.position) } }
-end
-info "All conditions are guessed: #{conditions.map(&:position)}"
-
-departure_conditions = conditions.select { |condition| condition.is?('departure') }
-departure_fields = departure_conditions.map { |condition| my_ticket[condition.position.first] }
-puts departure_fields.count
-puts departure_fields.reduce(&:*)
+departure_checksum = my_ticket.fields_by_name('departure').reduce(&:*)
+info "My Ticket departure checksum: #{departure_checksum}"
