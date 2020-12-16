@@ -18,3 +18,26 @@ end
 
 info "Invalid checksum #{invalid_checksum}"
 
+valid_tickets = tickets.select { |ticket| ticket.all? { |field| conditions.any? { |condition| condition.match?(field) } } }
+valid_tickets.push(my_ticket)
+info "Number of valid tickets: #{valid_tickets.count}"
+
+valid_tickets.each do |ticket|
+  ticket.each.with_index do |field, index|
+    conditions.each { |condition| condition.guess_position(field, index) }
+  end
+end
+
+iteration = 0
+while conditions.any?(&:multivariant?) do
+  info "Guessing positions: #{iteration += 1}"
+  obvious_positions = conditions.reject(&:multivariant?)
+  multivariant_positions = conditions.select(&:multivariant?)
+  multivariant_positions.each { |condition| obvious_positions.each { |obvious_condition| condition.remove_positions(obvious_condition.position) } }
+end
+info "All conditions are guessed: #{conditions.map(&:position)}"
+
+departure_conditions = conditions.select { |condition| condition.is?('departure') }
+departure_fields = departure_conditions.map { |condition| my_ticket[condition.position.first] }
+puts departure_fields.count
+puts departure_fields.reduce(&:*)
