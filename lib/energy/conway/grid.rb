@@ -39,7 +39,7 @@ module Energy
 
       def to_s
         layers = active_layers.map do |layer|
-          z = layer.first.first.z
+          z = layer.first.first.coordinates.last
           layer_string = layer.map do |line|
             line.map { |cube| cube }.join('')
           end.join("\n")
@@ -109,7 +109,7 @@ module Energy
       protected
 
       def init_cube(state, x, y, z)
-        @grid[z][y][x] = Energy::Conway::Cube.new(x, y, z, state)
+        @grid[z][y][x] = Energy::Conway::Cube.new([x, y, z], state)
       end
     end
   end

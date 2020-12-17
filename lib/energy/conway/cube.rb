@@ -1,19 +1,15 @@
 module Energy
   module Conway
     class Cube
-      attr_reader :x, :y, :z
+      attr_reader :coordinates
 
-      def initialize(x, y, z, state)
-        @x, @y, @z = [x, y, z]
+      def initialize(coordinates, state)
+        @coordinates = coordinates
         @active = parse_state(state)
       end
 
-      def coordinates
-        [x, y, z]
-      end
-
-      def at?(coordinates)
-        x == coordinates[0] && y == coordinates[1] && z == coordinates[2]
+      def at?(target)
+        coordinates.map.with_index {|coordinate, pos| coordinate == target[pos]}.all?
       end
 
       def active?
