@@ -56,14 +56,6 @@ module Energy
         layer.any? { |line| line.any?(&:active?) }
       end
 
-      def clone
-        clone = self.class.new(@shift)
-        @grid.each.with_index do |layer, z|
-          clone.initialize_layer(layer, z)
-        end
-        clone
-      end
-
       def active_layers
         @grid.select { |layer| layer_active?(layer) }
       end

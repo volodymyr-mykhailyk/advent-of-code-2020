@@ -11,17 +11,9 @@ module Energy
 
       def activate_cube(cube, active_neighbors_cubes)
         if cube.active?
-          if LIFE_CUBE_COUNT.include?(active_neighbors_cubes)
-            cube.set_active
-          else
-            cube.set_inactive
-          end
+          cube.schedule_state(LIFE_CUBE_COUNT.include?(active_neighbors_cubes))
         else
-          if ACTIVATION_CUBE_COUNT.include?(active_neighbors_cubes)
-            cube.set_active
-          else
-            cube.set_inactive
-          end
+          cube.schedule_state(ACTIVATION_CUBE_COUNT.include?(active_neighbors_cubes))
         end
       end
 
@@ -29,12 +21,18 @@ module Energy
         puts "****" * 10
         puts @cycle
         @cycle += 1
-        cache = @grid.clone
         @grid.activity_layers.each do |layer|
           layer.each do |line|
             line.each do |cube|
-              active_neighbors_cubes = cache.active_cubes_around(cube).count
+              active_neighbors_cubes = @grid.active_cubes_around(cube).count
               activate_cube(cube, active_neighbors_cubes)
+            end
+          end
+        end
+        @grid.activity_layers.each do |layer|
+          layer.each do |line|
+            line.each do |cube|
+              cube.execute_scheduled_state
             end
           end
         end
