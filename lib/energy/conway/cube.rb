@@ -1,9 +1,19 @@
 module Energy
   module Conway
     class Cube
+      attr_reader :x, :y, :z
+
       def initialize(x, y, z, state)
         @x, @y, @z = [x, y, z]
         @active = initial_state(state)
+      end
+
+      def coordinates
+        [x, y, z]
+      end
+
+      def at?(coordinates)
+        x == coordinates[0] && y == coordinates[1] && z == coordinates[2]
       end
 
       def active?
@@ -12,6 +22,14 @@ module Energy
 
       def inactive?
         !@active
+      end
+
+      def set_active
+        @active = true
+      end
+
+      def set_inactive
+        @active = false
       end
 
       def initial_state(state)
