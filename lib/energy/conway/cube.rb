@@ -8,10 +8,6 @@ module Energy
         @active = parse_state(state)
       end
 
-      def at?(target)
-        coordinates.map.with_index {|coordinate, pos| coordinate == target[pos]}.all?
-      end
-
       def active?
         !!@active
       end
@@ -23,10 +19,6 @@ module Energy
       def prepare_cycle_at(_)
       end
 
-      def activity_cubes
-        yield self
-      end
-
       def all_cubes
         yield self
       end
@@ -35,8 +27,8 @@ module Energy
         yield self if active?
       end
 
-      def active_cubes_around(_coordinates)
-        yield self if active?
+      def cubes_around(_coordinates)
+        yield self
       end
 
       def set_state(state, _coordinates)
@@ -50,10 +42,6 @@ module Energy
       def execute_scheduled_state
         @active = @future_state unless @future_state.nil?
         @future_state = nil
-      end
-
-      def inactive?
-        !@active
       end
 
       def to_s

@@ -9,7 +9,7 @@ module Energy
         @cycle = 0
       end
 
-      def activate_cube(cube, active_neighbors_cubes)
+      def update_cube_state(cube, active_neighbors_cubes)
         if cube.active?
           cube.schedule_state(LIFE_CUBE_COUNT.include?(active_neighbors_cubes))
         else
@@ -19,18 +19,16 @@ module Energy
 
       def advance
         @cycle += 1
-        @grid.activity_cubes.each do |cube|
-          active_neighbors_cubes = @grid.active_cubes_around(cube).count
-          activate_cube(cube, active_neighbors_cubes)
-        end
+        @grid.prepare_cycle
         @grid.all_cubes.each do |cube|
-          puts cube.inspect
-          cube.execute_scheduled_state
+          active_neighbors_cubes = @grid.cubes_around(cube).select(&:active?).count
+          update_cube_state(cube, active_neighbors_cubes)
         end
-        puts "****" * 10
-        puts @cycle
-        puts "****" * 10
-        puts @grid
+        @grid.finish_cycle
+        # puts "****" * 10
+        # puts @cycle
+        # puts "****" * 10
+        # puts @grid
       end
     end
   end

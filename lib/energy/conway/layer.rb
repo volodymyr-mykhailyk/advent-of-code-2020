@@ -7,7 +7,7 @@ module Energy
 
       def initialize(parent, depth, position)
         @position = position
-        @coordinates = [position] + parent.coordinates
+        @coordinates = ([position] + parent.coordinates).compact
         @name = NAMES[depth]
         @depth = depth
         @layer = Hash.new
@@ -15,8 +15,8 @@ module Energy
 
       def set_state(state, coordinates)
         coords = coordinates.clone
-        pos = coords.shift
-        element(pos).set_state(state, coords)
+        pos = coords.pop
+        prepare_element(pos).set_state(state, coords)
       end
 
       def build_element(element_position)
@@ -26,16 +26,8 @@ module Energy
 
       def prepare_cycle_at(coordinates)
         coords = coordinates.clone
-        pos = coords.shift
-        [element(pos - 1), element(pos), element(pos + 1)].each { |element| element.prepare_cycle_at(coords) }
-      end
-
-      def activity_cubes(&block)
-        activity_elements = elements.select do |element|
-          pos = element.position
-          element.active? || element_or_nil(pos - 1).active? || element_or_nil(pos + 1).active?
-        end
-        activity_elements.each { |element| element.activity_cubes(&block) }
+        pos = coords.pop
+        [pos - 1, pos, pos + 1].map { |x| prepare_element(x) }.each { |element| element.prepare_cycle_at(coords) }
       end
 
       def active_cubes(&block)
@@ -46,24 +38,28 @@ module Energy
         elements.each { |element| element.all_cubes(&block) }
       end
 
-      def active_cubes_around(coordinates, &block)
+      def cubes_around(coordinates, &block)
         coords = coordinates.clone
-        pos = coords.shift
-        [element_or_nil(pos - 1), element_or_nil(pos), element_or_nil(pos + 1)].compact.each { |element| element.active_cubes_around(coords, &block) }
-      end
-
-      def neighbors_elements(pos)
-        [element(pos - 1), element(pos + 1)]
+        pos = coords.pop
+        [pos - 1, pos, pos + 1].map { |x| element(x) }.compact.each { |element| element.cubes_around(coords, &block) }
       end
 
       def active?
         elements.any?(&:active?)
       end
 
-      def to_text(depth)
-        return elements.map { |element| element.to_text(depth - 1) }.join("\n") if depth == 1
-        return elements.map(&:to_s).join('') if depth == 0
-        "#{@name}=#{@position}#{elements.map { |element| element.to_text(depth - 1) }.join("\n\n")}"
+      def to_text(left_padding)
+        return sorted_elements.map { |element| element.to_text(left_padding) }.join("\n") if depth == 1
+        return "#{' ' * (left_padding + sorted_keys.min)}#{sorted_elements.map(&:to_s).join('')}" if depth == 0
+        sorted_keys.map { |key| "#{@name}=#{key}\n#{element(key).to_text(left_padding)}" }.join("\n\n")
+      end
+
+      def horizontal_dimensions
+        return [sorted_keys.min || 0, sorted_keys.max || 0] if depth == 0
+        dimensions = elements.map(&:horizontal_dimensions)
+        min = dimensions.map { |dim| dim.first }.min
+        max = dimensions.map { |dim| dim.last }.max
+        [min || 0, max || 0]
       end
 
       private
@@ -76,19 +72,16 @@ module Energy
         @layer.keys.sort.map { |key| @layer[key] }
       end
 
+      def sorted_keys
+        @layer.keys.sort
+      end
+
+      def prepare_element(pos)
+        @layer[pos] ||= build_element(pos)
+      end
+
       def element(pos)
-        @layer[pos] ||= build_element(pos)
-      end
-
-      def element_or_nil(pos)
-        @layer[pos] ||= build_element(pos)
-      end
-
-      def expand_for_activity
-        first = sorted_elements.first
-        last = sorted_elements.last
-        element(first.position - 1) if first.active?
-        element(last.position + 1) if last.active?
+        @layer[pos]
       end
     end
   end

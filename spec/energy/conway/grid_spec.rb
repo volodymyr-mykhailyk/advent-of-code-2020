@@ -12,10 +12,6 @@ RSpec.describe Energy::Conway::Grid do
       expect(grid.active_cubes.count).to eq(0)
     end
 
-    it 'has no activity cubes' do
-      expect(grid.activity_cubes.count).to eq(0)
-    end
-
     it 'has initialized cubes' do
       expect(grid.all_cubes.count).to eq(9)
     end
@@ -29,10 +25,6 @@ RSpec.describe Energy::Conway::Grid do
       expect(grid.active_cubes.count).to eq(5)
     end
 
-    it 'has activity cubes' do
-      expect(grid.activity_cubes.count).to eq(9)
-    end
-
     it 'has initialized cubes' do
       expect(grid.all_cubes.count).to eq(9)
     end
@@ -44,15 +36,52 @@ RSpec.describe Energy::Conway::Grid do
       before do
         grid.set_state(true, [0, 0])
         grid.prepare_cycle
-        puts grid.inspect
       end
 
-      it 'returns correct activity count' do
-        expect(grid.activity_cubes.count).to eq(8)
+      it 'expand area to include all activity cubes' do
+        expect(grid.all_cubes.count).to eq(9)
       end
 
       it 'returns correct cubes count' do
-        expect(grid.activity_cubes.map(&:coordinates)).to include([-1, -1], [1, 0], [0, 1])
+        expect(grid.all_cubes.map(&:coordinates)).to include([-1, -1], [1, 0], [0, 1])
+      end
+
+      it 'not extend corrdinates above active' do
+        grid.prepare_cycle
+        expect(grid.all_cubes.count).to eq(9)
+      end
+
+      it 'respects additional active cubes' do
+        grid.set_state(true, [1, 0])
+        grid.prepare_cycle
+        expect(grid.all_cubes.count).to eq(12)
+      end
+    end
+
+    context '3 dimensions' do
+      let(:grid) { described_class.new(3) }
+      before do
+        grid.set_state(true, [0, 0, 0])
+        grid.prepare_cycle
+      end
+
+      it 'expand area to include all activity cubes' do
+        expect(grid.all_cubes.count).to eq(27)
+      end
+
+      it 'returns correct cubes count' do
+        expect(grid.all_cubes.map(&:coordinates)).to include([-1, -1, -1], [1, 0, 0], [1, 0, 1])
+      end
+
+      it 'not extend corrdinates above active' do
+        grid.prepare_cycle
+        expect(grid.all_cubes.count).to eq(27)
+      end
+
+      it 'respects additional active cubes' do
+        grid.set_state(true, [0, 0, 1])
+        grid.prepare_cycle
+        expect(grid.all_cubes.count).to eq(36)
       end
     end
   end
