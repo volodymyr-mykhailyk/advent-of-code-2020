@@ -19,11 +19,6 @@ module Energy
         prepare_element(pos).set_state(state, coords)
       end
 
-      def build_element(element_position)
-        return Cube.new([element_position] + coordinates, false) if depth == 0
-        Layer.new(self, depth - 1, element_position)
-      end
-
       def prepare_cycle_at(coordinates)
         coords = coordinates.clone
         pos = coords.pop
@@ -64,6 +59,10 @@ module Energy
 
       private
 
+      def sorted_keys
+        @layer.keys.sort
+      end
+
       def elements
         @layer.values
       end
@@ -72,16 +71,17 @@ module Energy
         @layer.keys.sort.map { |key| @layer[key] }
       end
 
-      def sorted_keys
-        @layer.keys.sort
-      end
-
       def prepare_element(pos)
         @layer[pos] ||= build_element(pos)
       end
 
       def element(pos)
         @layer[pos]
+      end
+
+      def build_element(element_position)
+        return Cube.new([element_position] + coordinates, false) if depth == 0
+        Layer.new(self, depth - 1, element_position)
       end
     end
   end

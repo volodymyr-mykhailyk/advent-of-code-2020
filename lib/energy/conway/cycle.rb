@@ -25,10 +25,6 @@ module Energy
           update_cube_state(cube, active_neighbors_cubes)
         end
         @grid.finish_cycle
-        # puts "****" * 10
-        # puts @cycle
-        # puts "****" * 10
-        # puts @grid
       end
     end
   end

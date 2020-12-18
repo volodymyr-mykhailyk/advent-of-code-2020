@@ -16,9 +16,6 @@ module Energy
         coordinates.first
       end
 
-      def prepare_cycle_at(_)
-      end
-
       def all_cubes
         yield self
       end
@@ -30,6 +27,8 @@ module Energy
       def cubes_around(_coordinates)
         yield self
       end
+
+      def prepare_cycle_at(_) end
 
       def set_state(state, _coordinates)
         @active = parse_state(state)

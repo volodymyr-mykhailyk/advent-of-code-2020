@@ -12,20 +12,16 @@ module Energy
         @layer = Layer.new(self, dimensions - 1, nil)
       end
 
-      def coordinates
-        []
-      end
-
-      def set_state(state, coordinates)
-        @layer.set_state(state, coordinates)
-      end
-
       def initialize_from_plane(plane, coordinates)
         plane.each.with_index do |line, y|
           line.each.with_index do |state, x|
             set_state(state, coordinates.clone.unshift(x, y))
           end
         end
+      end
+
+      def set_state(state, coordinates)
+        @layer.set_state(state, coordinates)
       end
 
       def prepare_cycle
@@ -51,6 +47,10 @@ module Energy
       def to_s
         left_padding = @layer.horizontal_dimensions.first
         @layer.to_text(-left_padding)
+      end
+
+      def coordinates
+        []
       end
     end
   end
