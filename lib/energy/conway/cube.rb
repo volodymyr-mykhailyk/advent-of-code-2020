@@ -16,7 +16,30 @@ module Energy
         !!@active
       end
 
-      def set_state(state)
+      def position
+        coordinates.first
+      end
+
+      def prepare_cycle_at(_)
+      end
+
+      def activity_cubes
+        yield self
+      end
+
+      def all_cubes
+        yield self
+      end
+
+      def active_cubes
+        yield self if active?
+      end
+
+      def active_cubes_around(_coordinates)
+        yield self if active?
+      end
+
+      def set_state(state, _coordinates)
         @active = parse_state(state)
       end
 

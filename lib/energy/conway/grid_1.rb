@@ -1,39 +1,51 @@
 require_relative 'cube'
-require_relative 'layer'
 
 module Energy
   module Conway
     class Grid
-      attr_reader :dimensions
-
       def initialize(dimensions)
-        raise 'wrong dimensions' unless dimensions > 1
-        @dimensions = dimensions
-        @layer = Layer.new(self, dimensions - 1, 0)
+        @size = dimensions * 2
+        @shift = dimensions
+        @grid = []
+        range = (0..@size)
+        range.each do |z|
+          @grid[z] = []
+          range.each do |y|
+            @grid[z][y] = []
+            range.each do |x|
+              @grid[z][y][x] = init_cube('.', x, y, z)
+            end
+          end
+        end
       end
 
-      def coordinates
-        []
-      end
-
-      def set_state(state, coordinates)
-        @layer.set_state(state, coordinates)
+      def set_active(x, y, z)
+        cube_at(x, y, z).set_active
       end
 
       def set_inactive(x, y, z)
         cube_at(x, y, z).set_inactive
       end
 
-      def initialize_from_plane(plane, coordinates)
-        plane.each.with_index do |line, y|
+      def initialize_layer(layer, z = 0)
+        x_shift = @shift - layer.size / 2
+        y_shift = @shift - layer.first.size / 2
+        layer.each.with_index do |line, y|
           line.each.with_index do |state, x|
-            @layer.set_state(state, coordinates.clone.unshift(x, y))
+            init_cube(state, x + x_shift, y + y_shift, z)
           end
         end
       end
 
       def to_s
-        @layer.to_text(dimensions - 1)
+        layers = active_layers.map do |layer|
+          z = layer.first.first.coordinates.last
+          layer_string = layer.map do |line|
+            line.map { |cube| cube }.join('')
+          end.join("\n")
+          "z=#{z}\n#{layer_string}\n"
+        end
+        layers.any? ? layers.join("\n") : "<Empty Conway Grid>"
       end
 
       def layer_empty?(layer)
@@ -54,24 +66,14 @@ module Energy
         [@grid[z - 1], @grid[z + 1]]
       end
 
-      def prepare_cycle
-        active_cubes.each { |cube| @layer.prepare_cycle_at(cube.coordinates) }
-      end
-
-      def activity_cubes
-        @layer.enum_for(:activity_cubes)
-      end
-
-      def all_cubes
-        @layer.enum_for(:all_cubes)
-      end
-
-      def active_cubes
-        @layer.enum_for(:active_cubes)
+      def activity_layers
+        @grid.select.with_index do |layer, z|
+          layer_active?(layer) || neighbors_layers(z).any? { |neighbor| layer_active?(neighbor) }
+        end
       end
 
       def active_cubes_around(cube)
-        @layer.enum_for(:active_cubes_around, cube.coordinates).reject { |c| c == cube }
+        neighbor_cubes_around(cube).select(&:active?)
       end
 
       def neighbor_cubes_around(cube)
@@ -100,10 +102,13 @@ module Energy
         coordinate < 0 || coordinate > @size
       end
 
+      def active_cubes
+        active_layers.map { |layer| layer.map { |line| line.select(&:active?) } }.flatten.compact
+      end
 
       protected
 
-      def init_cube(state, coordinates)
+      def init_cube(state, x, y, z)
         @grid[z][y][x] = Energy::Conway::Cube.new([x, y, z], state)
       end
     end

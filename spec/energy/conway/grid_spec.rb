@@ -2,49 +2,58 @@ require 'spec_helper'
 require 'energy/conway/grid'
 
 RSpec.describe Energy::Conway::Grid do
-  let(:grid) { described_class.new(4) }
+  let(:grid) { described_class.new(3) }
 
-  it 'has all empty layers on init' do
-    expect(grid.active_layers.to_a).to be_empty
-  end
+  context 'empty grid' do
+    let(:layer) { %w[... ... ...].map { |line| line.split('') } }
+    before { grid.initialize_from_plane(layer, [0]) }
 
-  it 'returns active layer' do
-    grid.set_active(2, 2, 2)
-    expect(grid.active_layers.to_a).not_to be_empty
-  end
-
-  describe '#active_cubes' do
-    it 'empty without active cubes' do
+    it 'has no active cubes' do
       expect(grid.active_cubes.count).to eq(0)
     end
 
-    it 'returns active cubes' do
-      grid.set_active(2, 2, 2)
-      grid.set_active(2, 1, 2)
-      expect(grid.active_cubes.count).to eq(2)
+    it 'has no activity cubes' do
+      expect(grid.activity_cubes.count).to eq(0)
+    end
+
+    it 'has initialized cubes' do
+      expect(grid.all_cubes.count).to eq(9)
     end
   end
 
-  describe '#activity_layers' do
-    it 'empty without active cubes' do
-      expect(grid.activity_layers.to_a).to be_empty
+  context 'sample layer' do
+    let(:layer) { %w[.#. ..# ###].map { |line| line.split('') } }
+    before { grid.initialize_from_plane(layer, [0]) }
+
+    it 'has active cubes' do
+      expect(grid.active_cubes.count).to eq(5)
     end
 
-    it 'returns neighbor layers' do
-      grid.set_active(2, 2, 2)
-      expect(grid.activity_layers.to_a.count).to eq(3)
+    it 'has activity cubes' do
+      expect(grid.activity_cubes.count).to eq(9)
+    end
+
+    it 'has initialized cubes' do
+      expect(grid.all_cubes.count).to eq(9)
     end
   end
 
-  describe "#neighbor_cubes_around" do
-    it 'returns 26 cubes' do
-      cube = grid.cube_at(2, 2, 2)
-      expect(grid.neighbor_cubes_around(cube).uniq.count).to eq(26)
-    end
+  describe 'cycle preparation' do
+    context '2 dimensions' do
+      let(:grid) { described_class.new(2) }
+      before do
+        grid.set_state(true, [0, 0])
+        grid.prepare_cycle
+        puts grid.inspect
+      end
 
-    it 'does not include current' do
-      cube = grid.cube_at(2, 2, 2)
-      expect(grid.neighbor_cubes_around(cube)).to_not include(cube)
+      it 'returns correct activity count' do
+        expect(grid.activity_cubes.count).to eq(8)
+      end
+
+      it 'returns correct cubes count' do
+        expect(grid.activity_cubes.map(&:coordinates)).to include([-1, -1], [1, 0], [0, 1])
+      end
     end
   end
 end

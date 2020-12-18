@@ -28,36 +28,27 @@ RSpec.describe Energy::Conway::Cycle do
     end
   end
 
-  describe 'scenarios 0' do
+  describe 'flat scenario' do
+    let(:grid) { Energy::Conway::Grid.new(2) }
     before do
-      grid.initialize_layer(%w[.#. ..# ###].map {|line| line.split('')}, 2)
+      grid.initialize_from_plane(%w[.#. ..# ###].map { |line| line.split('') }, [])
     end
 
     it 'correctly evolves' do
-      cycle.advance
-      # puts grid
-      # puts '----' * 10
-      cycle.advance
-      # puts grid
-    end
-
-    it 'example' do
       puts grid
-      puts '----' * 10
-      puts grid.clone
+      6.times { cycle.advance }
+      expect(grid.active_cubes.count).to eq(112)
     end
   end
 
-  describe 'scenarios 1' do
+  describe 'scenarios 0' do
     before do
-      grid.initialize_layer(%w[#.. ..# .#.].map {|line| line.split('')}, 1)
-      grid.initialize_layer(%w[#.# .## .#.].map {|line| line.split('')}, 2)
-      grid.initialize_layer(%w[#.. ..# .#.].map {|line| line.split('')}, 3)
+      grid.initialize_from_plane(%w[.#. ..# ###].map { |line| line.split('') }, 2)
     end
 
     it 'correctly evolves' do
-      cycle.advance
-      puts grid
+      6.times { cycle.advance }
+      expect(grid.active_cubes.count).to eq(112)
     end
   end
 end
