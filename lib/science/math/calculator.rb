@@ -2,38 +2,16 @@ require 'ripper'
 
 module Science
   module Math
-    class Expression
+    class Calculator
       attr_reader :operator
 
-      def initialize(expression)
+      def initialize(expression, tokens_parser)
         tokens = expression.is_a?(Array) ? expression : Tokenizer.new.tokens(expression)
-        @operator = parse_tokens(tokens)
+        @operator = tokens_parser.parse_tokens(tokens)
       end
 
       def result
         @operator.result
-      end
-
-      def parse_tokens(tokens)
-        return tokens.first if tokens.length == 1
-
-        left = parse_element(tokens.shift)
-        operator = parse_element(tokens.shift)
-        right = parse_element(tokens.shift)
-        operator.assign_operands(left, right)
-
-        tokens.unshift(operator)
-
-        parse_tokens(tokens)
-      end
-
-      def parse_element(element)
-        return element if element.is_a?(Operator)
-        return Expression.new(element) if element.is_a?(Array)
-        return Sum.new if element == '+'
-        return Multiply.new if element == '*'
-        return Number.new(element) if element =~ /^\d+/
-        raise "unknown element: #{element.inspect}"
       end
 
       class Operator
@@ -70,6 +48,49 @@ module Science
 
         def result
           @value
+        end
+      end
+
+      class EqualPriorityParser
+        def parse_tokens(tokens)
+          return parse_element(tokens.first) if tokens.length == 1
+
+          left = parse_element(tokens.shift)
+          operator = parse_element(tokens.shift)
+          right = parse_element(tokens.shift)
+          operator.assign_operands(left, right)
+
+          tokens.unshift(operator)
+
+          parse_tokens(tokens)
+        end
+
+        protected
+
+        def parse_element(element)
+          return element if element.is_a?(Operator)
+          return Calculator.new(element, self) if element.is_a?(Array)
+          return Sum.new if element == '+'
+          return Multiply.new if element == '*'
+          return Number.new(element) if element =~ /^\d+/
+          raise "unknown element: #{element.inspect}"
+        end
+      end
+
+      class SumKingParser < EqualPriorityParser
+        def parse_tokens(tokens)
+          return parse_element(tokens.first) if tokens.length == 1
+          return super(tokens) unless tokens.include?('+')
+
+          first_plus = tokens.find_index('+') -1
+          left = parse_element(tokens.delete_at(first_plus))
+          operator = parse_element(tokens.delete_at(first_plus))
+          right = parse_element(tokens.delete_at(first_plus))
+
+          operator.assign_operands(left, right)
+          tokens.insert(first_plus, operator)
+
+          parse_tokens(tokens)
         end
       end
 
