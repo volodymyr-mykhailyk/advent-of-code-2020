@@ -16,6 +16,10 @@ module Navigation
       @grid.values
     end
 
+    def coordinates
+      @grid.keys
+    end
+
     class Navigator
       MOVES = {
         'e' => -> (x, y) { [x + 2, y] },
@@ -33,7 +37,6 @@ module Navigation
         @start = start
       end
 
-
       def coordinates_via(path)
         coordinates = start
         while (direction = next_direction(path)) do
@@ -41,6 +44,10 @@ module Navigation
           coordinates = MOVES[direction].call(*coordinates)
         end
         coordinates
+      end
+
+      def adjacent_coordinates(coordinates)
+        MOVES.values.map { |lambda| lambda.call(*coordinates) }
       end
 
       protected
