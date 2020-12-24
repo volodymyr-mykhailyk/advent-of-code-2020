@@ -12,6 +12,10 @@ module Navigation
       @grid[coordinates] = value
     end
 
+    def delete_at(coordinates)
+      @grid.delete(coordinates)
+    end
+
     def nodes
       @grid.values
     end
