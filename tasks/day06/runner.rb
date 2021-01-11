@@ -8,5 +8,8 @@ forms = input_reader.all_groups.split_with(/\s/).read
 forms = forms.map { |answers| Customs::GroupDeclarationForm.new(answers) }
 info "Processing #{forms.length} forms"
 
-positive_answers_sum = forms.sum { |form| form.positive_answers_list.count }
-info "Sum of all positive answers is: #{positive_answers_sum}"
+anyone_answered_questions_sum = forms.sum { |form| form.all_positive_answers.count }
+info "Sum of any positive answers is: #{anyone_answered_questions_sum}"
+
+everyone_answered_questions_sum = forms.sum { |form| form.everyone_positive_answers.count }
+info "Sum of everyone positive answers is: #{everyone_answered_questions_sum}"

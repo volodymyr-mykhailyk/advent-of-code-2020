@@ -2,11 +2,27 @@ module Customs
   class GroupDeclarationForm
     def initialize(answers = [])
       @answers = {}
-      answers.each { |answer| answer.split('').each { |question| @answers[question] = true } }
+      @people = answers.length
+      process_answers(answers)
     end
 
-    def positive_answers_list
+    def all_positive_answers
       @answers.keys.sort
+    end
+
+    def everyone_positive_answers
+      @answers.keys.select {|key| @answers[key] == @people}
+    end
+
+    private
+
+    def process_answers(answers)
+      answers.each do |answer|
+        answer.split('').each do |question|
+          @answers[question] ||= 0
+          @answers[question] +=1
+        end
+      end
     end
   end
 end
