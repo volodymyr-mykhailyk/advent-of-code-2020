@@ -4,17 +4,9 @@ require_relative '../../lib/customs/passport_scanner'
 
 input_reader = Utils::InputReader.new(File.expand_path('input.txt'))
 
-passports = []
-current_passport = []
-input_reader.all_lines.split_with(' ').read.each do |line|
-  if line.empty?
-    passports << current_passport.to_h
-    current_passport = []
-  else
-    current_passport.concat(line.map { |pair| pair.split(':') })
-  end
-end
-passports << current_passport.to_h
+passports = input_reader.all_groups.split_with(/\s/).read
+passports = passports.map { |passport| Hash[passport.map { |identifier| identifier.split(':') }] }
+
 info "Processing #{passports.length} passports"
 
 scanner = Customs::PasswordScanner.new

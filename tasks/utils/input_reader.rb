@@ -10,6 +10,11 @@ module Utils
       self
     end
 
+    def all_groups(separator = "\n\n")
+      @output = file.read.split(separator)
+      self
+    end
+
     def one_line
       @output = file.readline.chomp
       self
@@ -19,17 +24,6 @@ module Utils
       @output = convert_output { |element| element.split(separator) }
       self
     end
-
-    # def group_using(separator)
-    #   position = 0
-    #   chunked = @output.chunk do |e|
-    #     position += 1 if e == separator
-    #     position
-    #   end
-    #   puts chunked.to_a.inspect
-    #   @output = chunked.map { |_p, group| group }
-    #   self
-    # end
 
     def to_integer
       @output = convert_output { |element| element.to_i }
