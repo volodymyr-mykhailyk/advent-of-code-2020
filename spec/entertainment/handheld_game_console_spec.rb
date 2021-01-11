@@ -20,15 +20,22 @@ describe Entertainment::HandheldGameConsole do
       expect(console.accumulator).to eq(0)
     end
 
-    it 'stops on loop' do
-      expect { console.run }.to raise_error('infinite loop')
+    it 'fails with loop' do
+      expect(console.run).to be_falsey
     end
 
     it 'correctly executes code' do
       console.run
-    rescue => _
-    ensure
       expect(console.accumulator).to eq(5)
+    end
+
+    it 'runs in safe mode' do
+      expect(console.safe_mode.run).to be_truthy
+    end
+
+    it 'calculates accumulator in safe mode' do
+      safe_mode = console.safe_mode.tap(&:run)
+      expect(safe_mode.accumulator).to eq(8)
     end
   end
 end

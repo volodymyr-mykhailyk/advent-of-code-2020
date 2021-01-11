@@ -8,9 +8,10 @@ instructions = input_reader.all_lines.split_with(' ').read
 info "Simulating boot code from #{instructions.length} instructions"
 
 console = Entertainment::HandheldGameConsole.new(instructions)
-begin
-  console.run
-rescue => _
-end
-accumulator = console.accumulator
-info "Accumulator at beginning of loop #{accumulator}"
+info "Boot sequence executed: #{console.run}"
+info "Accumulator after run: #{console.accumulator}"
+
+safe_mode = console.safe_mode
+info "Running in safe mode"
+info "Boot sequence executed: #{safe_mode.run}"
+info "Accumulator after run: #{safe_mode.accumulator}"
