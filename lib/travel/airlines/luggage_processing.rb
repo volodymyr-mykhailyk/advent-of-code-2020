@@ -18,6 +18,10 @@ module Travel
         end
       end
 
+      def bags_inside_of(bag)
+        @bags[bag].bags_inside
+      end
+
       protected
 
       def read_bags(bags_descriptions)
@@ -30,7 +34,7 @@ module Travel
       end
 
       def read_children_bags(bag, contained_bags)
-        contents = contained_bags.map { |key, count| [bag_for(key.delete_suffix('s')), count] }
+        contents = contained_bags.map { |key, count| [bag_for(key.delete_suffix('s')), count.to_i] }
         bag.contents = Hash[contents]
       end
 

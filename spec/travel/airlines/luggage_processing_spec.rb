@@ -22,5 +22,9 @@ describe Travel::Airlines::LuggageProcessing do
     it 'returns correct holding bags' do
       expect(luggage.bags_holding_a('shiny gold bag').count).to eq(4)
     end
+
+    it 'returns number of bags inside' do
+      expect(luggage.bags_inside_of('shiny gold bag')).to eq(32)
+    end
   end
 end

@@ -10,3 +10,6 @@ info "Processing #{bags_descriptions.length} bag descriptions"
 luggage_processing = Travel::Airlines::LuggageProcessing.new(bags_descriptions)
 gold_containing_bags_count = luggage_processing.bags_holding_a('shiny gold bag').count
 info "Bags that can containing shiny gold bag: #{gold_containing_bags_count}"
+
+bags_inside_gold_bag = luggage_processing.bags_inside_of('shiny gold bag')
+info "Number of bags inside shiny gold bag: #{bags_inside_gold_bag}"
