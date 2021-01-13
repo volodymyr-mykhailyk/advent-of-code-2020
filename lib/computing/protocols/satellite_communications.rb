@@ -22,7 +22,7 @@ module Computing
       end
 
       def valid_message?(message)
-        regexp = /^#{rule_at('0').to_regexp}$/
+        regexp = /^#{rule_at('0').to_regexp(0)}$/
         message.match?(regexp)
       end
 
@@ -30,7 +30,7 @@ module Computing
         @rules[position]
       end
 
-      class CharacterRule
+      class AndRule
         attr_reader :protocol, :value
 
         def initialize(protocol, value)
@@ -38,12 +38,22 @@ module Computing
           @value = tokenize(value)
         end
 
-        def matches?(string)
-          puts "CharacterRule:#{value}:#{string.inspect}"
-          string.shift == value
+        def to_regexp(depth)
+          return '' if depth > 50
+          value.map { |rule| protocol.rule_at(rule).to_regexp(depth + 1) }.join
         end
 
-        def to_regexp
+        def tokenize(text)
+          text.split(' ')
+        end
+
+        def self.described_as?(_text)
+          raise 'not implemented'
+        end
+      end
+
+      class CharacterRule < AndRule
+        def to_regexp(_depth)
           value.to_s
         end
 
@@ -56,34 +66,14 @@ module Computing
         end
       end
 
-      class AndRule < CharacterRule
-        def matches?(string)
-          value.all? { |rule| protocol.rule_at(rule).matches?(string) }
-        end
-
-        def to_regexp
-          value.map { |rule| protocol.rule_at(rule).to_regexp }.join
-        end
-
-        def tokenize(text)
-          text.split(' ')
-        end
-
-        def self.described_as?(text)
-          return false if CharacterRule.described_as?(text)
-          return false if OrRule.described_as?(text)
-
-          true
-        end
-      end
-
-      class OrRule < CharacterRule
+      class OrRule < AndRule
         def matches?(string)
           value.any? { |rule| rule.matches?(string.clone) }
         end
 
-        def to_regexp
-          "(#{value.map(&:to_regexp).join('|')})"
+        def to_regexp(depth)
+          patterns = value.map { |rule| rule.to_regexp(depth + 1) }
+          "(?:#{patterns.join('|')})"
         end
 
         def tokenize(text)
